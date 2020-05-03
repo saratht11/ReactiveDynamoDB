@@ -1,1 +1,1 @@
-# ReactiveDynaomoDB
+# ReactiveDynamoDB
