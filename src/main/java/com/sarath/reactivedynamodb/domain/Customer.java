@@ -11,7 +11,7 @@ public class Customer {
     private String lName;
     private String contactNo;
     private Address address;
-    private String createdTimeStamp;
+    private Long createdTimeStamp;
 
     @DynamoDbPartitionKey
     @DynamoDbAttribute("CustomerID")
@@ -40,7 +40,7 @@ public class Customer {
     }
 
     @DynamoDbAttribute("CustomerCreatedTime")
-    public String getCreatedTimeStamp() { return createdTimeStamp; }
+    public Long getCreatedTimeStamp() { return createdTimeStamp; }
 
     public void setCustomerID(String customerID) {
         this.customerID = customerID;
@@ -62,7 +62,7 @@ public class Customer {
         this.contactNo = contactNo;
     }
 
-    public void setCreatedTimeStamp(String createdTimeStamp) { this.createdTimeStamp = createdTimeStamp; }
+    public void setCreatedTimeStamp(Long createdTimeStamp) { this.createdTimeStamp = createdTimeStamp; }
 
     @Override
     public String toString() {

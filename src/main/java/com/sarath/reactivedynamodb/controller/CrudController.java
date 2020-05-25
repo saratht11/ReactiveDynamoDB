@@ -23,7 +23,7 @@ public class CrudController {
     }
 
     @GetMapping("/get/{customerId}")//R
-    public Mono<Customer> getCustomer(@PathVariable("customerId") String customerId) {
+    public Mono<Customer> getCustomer(@PathVariable() String customerId) {
         return customerService.getCustomerByCustomerId(customerId);
     }
 
@@ -33,7 +33,7 @@ public class CrudController {
     }
 
     @DeleteMapping("/delete/{customerId}")//D
-    public Mono<Result> deleteCustomer(@PathVariable("customerId") String customerId) {
+    public Mono<Result> deleteCustomer(@PathVariable() String customerId) {
         return customerService.deleteCustomerByCustomerId(customerId);
     }
 
@@ -43,7 +43,7 @@ public class CrudController {
     }
 
     @GetMapping("/query/{customerId}")
-    public Mono<Address> queryCustomerAddress(@PathVariable("customerId") String customerId) {
+    public Mono<Address> queryCustomerAddress(@PathVariable() String customerId) {
         return customerService.queryAddressByCustomerId(customerId);
     }
 

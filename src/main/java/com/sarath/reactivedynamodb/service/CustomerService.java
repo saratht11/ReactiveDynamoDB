@@ -9,29 +9,30 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import software.amazon.awssdk.core.async.SdkPublisher;
 
+import java.time.Instant;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.LongSupplier;
 
 import static com.sarath.reactivedynamodb.util.Result.FAIL;
 import static com.sarath.reactivedynamodb.util.Result.SUCCESS;
-import static java.lang.String.valueOf;
-import static java.time.Instant.now;
+
 
 @Service
 public class CustomerService {
 
     private final CustomerRepository customerRepository;
+    private final LongSupplier getEpochSecond = () -> Instant.now().getEpochSecond();
 
     public CustomerService(CustomerRepository customerRepository) {
         this.customerRepository = customerRepository;
     }
 
     public Mono<Result> createNewCustomer(Customer customer) {
-        customer.setCreatedTimeStamp(valueOf(now().getEpochSecond()));
-        Result createStatus = customerRepository.save(customer)
-                .handle((__, ex) -> ex == null ? SUCCESS : FAIL)
-                .join();
-        return Mono.just(createStatus);
+        customer.setCreatedTimeStamp(getEpochSecond.getAsLong());
+        CompletableFuture<Result> handle = customerRepository.save(customer)
+                .handle((__, ex) -> ex == null ? SUCCESS : FAIL);
 
+        return Mono.fromFuture(handle);
     }
 
     public Mono<Customer> getCustomerByCustomerId(String customerId) {
@@ -42,6 +43,7 @@ public class CustomerService {
                     }
                 })
                 .exceptionally(ex -> new Customer());
+
         return Mono.fromFuture(customer);
     }
 
@@ -49,38 +51,38 @@ public class CustomerService {
         SdkPublisher<Address> customerAddress = customerRepository.getCustomerAddress(customerId)
                 .items()
                 .map(Customer::getAddress);
+
         return Mono.from(customerAddress)
                 .onErrorReturn(new Address());
     }
 
     public Mono<Result> updateExistingCustomer(Customer customer) {
-        customer.setCreatedTimeStamp(valueOf(now().getEpochSecond()));
-        Result updateStatus = customerRepository.getCustomerByID(customer.getCustomerID())
+        customer.setCreatedTimeStamp(getEpochSecond.getAsLong());
+        CompletableFuture<Result> handle = customerRepository.getCustomerByID(customer.getCustomerID())
                 .thenApply(retrievedCustomer -> {
                     if (null == retrievedCustomer) {
                         throw new IllegalArgumentException("Invalid CustomerID");
                     }
                     return retrievedCustomer;
                 }).thenCompose(__ -> customerRepository.updateCustomer(customer))
-                .handle((__, ex) -> ex == null ? SUCCESS : FAIL)
-                .join();
+                .handle((__, ex) -> ex == null ? SUCCESS : FAIL);
 
-        return Mono.just(updateStatus);
+        return Mono.fromFuture(handle);
     }
 
     public Mono<Result> updateExistingOrCreateCustomer(Customer customer) {
-        customer.setCreatedTimeStamp(valueOf(now().getEpochSecond()));
-        Result updateStatus = customerRepository.updateCustomer(customer)
-                .handle((__, ex) -> ex == null ? SUCCESS : FAIL)
-                .join();
-        return Mono.just(updateStatus);
+        customer.setCreatedTimeStamp(getEpochSecond.getAsLong());
+        CompletableFuture<Result> handle = customerRepository.updateCustomer(customer)
+                .handle((__, ex) -> ex == null ? SUCCESS : FAIL);
+
+        return Mono.fromFuture(handle);
     }
 
     public Mono<Result> deleteCustomerByCustomerId(String customerId) {
-        Result deleteStatus = customerRepository.deleteCustomerById(customerId)
-                .handle((__, ex) -> ex == null ? SUCCESS : FAIL)
-                .join();
-        return Mono.just(deleteStatus);
+        CompletableFuture<Result> handle = customerRepository.deleteCustomerById(customerId)
+                .handle((__, ex) -> ex == null ? SUCCESS : FAIL);
+
+        return Mono.fromFuture(handle);
     }
 
     public Flux<Customer> getCustomerList() {
