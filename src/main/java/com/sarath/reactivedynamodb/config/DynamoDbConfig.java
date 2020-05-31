@@ -20,16 +20,16 @@ public class DynamoDbConfig {
     @Bean
     public DynamoDbAsyncClient getDynamoDbAsyncClient() {
         return DynamoDbAsyncClient.builder()
-                .credentialsProvider(ProfileCredentialsProvider.create("default"))
-                .endpointOverride(URI.create(dynamoDbEndPointUrl))
-                .build();
+                                  .credentialsProvider(ProfileCredentialsProvider.create("default"))
+                                  .endpointOverride(URI.create(dynamoDbEndPointUrl))
+                                  .build();
     }
 
     @Bean
     public DynamoDbEnhancedAsyncClient getDynamoDbEnhancedAsyncClient() {
         return DynamoDbEnhancedAsyncClient.builder()
-                .dynamoDbClient(getDynamoDbAsyncClient())
-                .build();
+                                          .dynamoDbClient(getDynamoDbAsyncClient())
+                                          .build();
     }
 
 }

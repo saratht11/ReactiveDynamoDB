@@ -1,26 +1,22 @@
 package com.sarath.reactivedynamodb.repos;
 
 import com.sarath.reactivedynamodb.domain.Customer;
-import org.springframework.stereotype.Repository;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbAsyncTable;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedAsyncClient;
-import software.amazon.awssdk.enhanced.dynamodb.Key;
-import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
+import org.springframework.stereotype.Service;
+import software.amazon.awssdk.core.async.SdkPublisher;
+import software.amazon.awssdk.enhanced.dynamodb.*;
 import software.amazon.awssdk.enhanced.dynamodb.model.PagePublisher;
 
 import java.util.concurrent.CompletableFuture;
 
 import static software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional.keyEqualTo;
 
-@Repository
+@Service
 public class CustomerRepository {
 
-    private final DynamoDbEnhancedAsyncClient enhancedAsyncClient;
     private final DynamoDbAsyncTable<Customer> customerDynamoDbAsyncTable;
 
     public CustomerRepository(DynamoDbEnhancedAsyncClient asyncClient) {
-        this.enhancedAsyncClient = asyncClient;
-        this.customerDynamoDbAsyncTable = enhancedAsyncClient.table(Customer.class.getSimpleName(), TableSchema.fromBean(Customer.class));
+        this.customerDynamoDbAsyncTable = asyncClient.table(Customer.class.getSimpleName(), TableSchema.fromBean(Customer.class));
     }
 
     //CREATE
@@ -44,10 +40,10 @@ public class CustomerRepository {
     }
 
     //READ_CUSTOMER_ADDRESS_ONLY
-    public PagePublisher<Customer> getCustomerAddress(String customerId) {
-        return customerDynamoDbAsyncTable
-                .query(r -> r.queryConditional(keyEqualTo(k -> k.partitionValue(customerId)))
-                        .addAttributeToProject("CustomerAddress"));
+    public SdkPublisher<Customer> getCustomerAddress(String customerId) {
+        return customerDynamoDbAsyncTable.query(r -> r.queryConditional(keyEqualTo(k -> k.partitionValue(customerId)))
+                                                      .addAttributeToProject("CustomerAddress"))
+                                         .items();
     }
 
     //GET_ALL_ITEM
@@ -56,7 +52,9 @@ public class CustomerRepository {
     }
 
     private Key getKeyBuild(String customerId) {
-        return Key.builder().partitionValue(customerId).build();
+        return Key.builder()
+                  .partitionValue(customerId)
+                  .build();
     }
 
 }

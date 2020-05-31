@@ -13,6 +13,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import static com.sarath.reactivedynamodb.util.Result.SUCCESS;
@@ -103,6 +104,18 @@ public class CrudControllerTest {
                 .expectStatus()
                 .is2xxSuccessful()
                 .expectBody(Address.class)
+                .consumeWith(Assert::assertNotNull);
+    }
+
+    @Test
+    public void getAllCustomer() {
+        when(customerService.getCustomerList()).thenReturn(Flux.just(new Customer()));
+        webTestClient.get()
+                .uri("/allCustomerList")
+                .exchange()
+                .expectStatus()
+                .is2xxSuccessful()
+                .expectBodyList(Customer.class)
                 .consumeWith(Assert::assertNotNull);
     }
 }
