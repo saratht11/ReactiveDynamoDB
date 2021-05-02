@@ -15,8 +15,8 @@ public class CustomerRepository {
 
     private final DynamoDbAsyncTable<Customer> customerDynamoDbAsyncTable;
 
-    public CustomerRepository(DynamoDbEnhancedAsyncClient asyncClient) {
-        this.customerDynamoDbAsyncTable = asyncClient.table(Customer.class.getSimpleName(), TableSchema.fromBean(Customer.class));
+    public CustomerRepository(DynamoDbAsyncTable<Customer> customerDynamoDbAsyncTable) {
+        this.customerDynamoDbAsyncTable = customerDynamoDbAsyncTable;
     }
 
     //CREATE
