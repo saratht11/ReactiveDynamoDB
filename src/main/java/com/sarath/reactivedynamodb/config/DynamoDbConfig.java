@@ -4,6 +4,8 @@ import com.sarath.reactivedynamodb.domain.Customer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import reactor.core.scheduler.Scheduler;
+import reactor.core.scheduler.Schedulers;
 import software.amazon.awssdk.auth.credentials.ProfileCredentialsProvider;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbAsyncTable;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedAsyncClient;
@@ -38,6 +40,11 @@ public class DynamoDbConfig {
     @Bean
     public DynamoDbAsyncTable<Customer> getDynamoDbAsyncCustomer(DynamoDbEnhancedAsyncClient asyncClient) {
         return asyncClient.table(Customer.class.getSimpleName(), TableSchema.fromBean(Customer.class));
+    }
+
+    @Bean("dynamoScheduler")
+    public Scheduler dynamoScheduler() {
+        return Schedulers.newElastic("dynamo-db");
     }
 
 }
